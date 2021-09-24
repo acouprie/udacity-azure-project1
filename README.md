@@ -56,3 +56,8 @@ $ terraform deploy
 ## Modify
 
 The file `terraform/vars.tf` contains all the variables used inside the `terraform/main.tf`. If you want to personnalize the code, it is likely those values you want to modify first.
+
+## Acknowledgement
+
+I acknowledge [rfoltz](https://github.com/rfoltz/Udacity-DevOps-Project-1), a very well structured project that gave me insight when I was stuck, especially on the Terraform part.
+I also aknowledge the students and mentors of Udacity, from where I got valuable information, especially on the Policy and Packer part.

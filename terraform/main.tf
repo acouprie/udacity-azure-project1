@@ -2,13 +2,13 @@ provider "azurerm" {
   features {}
 }
 
-#get the image that was create by the packer script
+# get the image that was create by the packer script
 data "azurerm_image" "web" {
   name                = "udacity-packer-image"
   resource_group_name = var.packer_resource_group
 }
 
-#create the resource group specificed by the user
+# create the resource group specificed by the user
 resource "azurerm_resource_group" "main" {
   name     = var.resource_group
   location = var.location
@@ -19,7 +19,7 @@ resource "azurerm_network_security_group" "main" {
   location            = azurerm_resource_group.main.location
   resource_group_name = azurerm_resource_group.main.name
 
-  //Add a security rule for the VM's to recieve HTTP data on port 8080.
+  // Add a security rule for the VM's to recieve HTTP data on port 8080.
   security_rule {
     name                       = "HTTP"
     priority                   = 100
@@ -52,7 +52,7 @@ resource "azurerm_subnet_network_security_group_association" "main" {
   network_security_group_id = azurerm_network_security_group.main.id
 }
 
-#create network interfaces for the VM's
+# create network interfaces for the VM's
 resource "azurerm_network_interface" "main" {
   count               = var.num_of_vms
   name                = "${var.prefix}-${count.index}-nic"
@@ -67,7 +67,7 @@ resource "azurerm_network_interface" "main" {
   }
 }
 
-#create a public IP for the Load Balancer
+# create a public IP for the Load Balancer
 resource "azurerm_public_ip" "main" {
   name                = "lb-public-ip"
   resource_group_name = azurerm_resource_group.main.name
@@ -106,7 +106,7 @@ resource "azurerm_network_interface_backend_address_pool_association" "main" {
   backend_address_pool_id = azurerm_lb_backend_address_pool.main.id
 }
 
-//Create a rule for the LB to route traffic from the 80 port to the backend 8080 port on each VM
+// Create a rule for the LB to route traffic from the 80 port to the backend 8080 port on each VM
 resource "azurerm_lb_rule" "main" {
   resource_group_name            = azurerm_resource_group.main.name
   loadbalancer_id                = azurerm_lb.main.id
@@ -139,7 +139,7 @@ resource "azurerm_linux_virtual_machine" "main" {
   network_interface_ids = [element(azurerm_network_interface.main.*.id, count.index)]
   availability_set_id = azurerm_availability_set.main.id
 
-  #use the image we sourced at the beginnng of the script.
+  # use the image we sourced at the beginnng of the script.
   source_image_id = data.azurerm_image.web.id
 
   os_disk {
@@ -154,7 +154,7 @@ resource "azurerm_linux_virtual_machine" "main" {
   }
 }
 
-#create a virtual disk for each VM created.
+# create a virtual disk for each VM created.
 resource "azurerm_managed_disk" "main" {
   count                           = var.num_of_vms
   name                            = "data-disk-${count.index}"
