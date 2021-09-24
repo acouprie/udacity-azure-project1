@@ -19,7 +19,7 @@ resource "azurerm_network_security_group" "main" {
   location            = azurerm_resource_group.main.location
   resource_group_name = azurerm_resource_group.main.name
 
-  // Add a security rule for the VM's to recieve HTTP data on port 8080.
+  # Add a security rule for the VM's to receive HTTP data on port 8080.
   security_rule {
     name                       = "HTTP"
     priority                   = 100
