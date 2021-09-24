@@ -38,11 +38,17 @@ Deploy the policy (I did it on the Portal) and assign it to the resource group.
 $ packer build packer/server.json
 ```
 
-### Deploy with Terraform
+### Prepare with Terraform
 
 ```
 $ terraform init
 $ terraform plan -out solution.plan
+```
+
+### Deploy with Terraform
+
+```
+$ terraform apply "solution.plan"
 ```
 
 ## After
