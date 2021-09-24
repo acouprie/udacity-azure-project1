@@ -11,25 +11,30 @@ variable "packer_resource_group" {
 }
 
 variable "prefix" {
-  description = "The prefix which should be used for all resources in the resource group specified"
-  default     = "udacity-pg"
+  description = "The prefix which should be used for all resources in this example"
+  default     = "udacity-assignment"
   type        = string
-}
-
-variable "num_of_vms" {
-  description = "Number of VM resources to create behind the load balancer"
-  default     = 3
-  type        = number
 }
 
 variable "location" {
   description = "The Azure Region in which all resources in this example should be created."
   default     = "West Europe"
+}
+
+variable "username" {
+  description = "The login of the virtual machines."
+  default     = "ether"
   type        = string
 }
 
-variable "vm_password" {
+variable "password" {
   description = "The password of the virtual machines."
   default     = "Th151545tr0ngP455word"
   type        = string
+}
+
+variable "nb_vms" {
+  description = "The nb of VM to create."
+  default     = 3
+  type        = number
 }

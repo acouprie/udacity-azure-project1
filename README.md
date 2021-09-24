@@ -5,9 +5,9 @@ It aims at deploying a policy, an image from a Packer template that will be used
 
 ## Dependencies
 
-An Azure account
-Packer
-Terraform
+- An Azure account
+- Packer
+- Terraform
 
 ## Deploy
 
