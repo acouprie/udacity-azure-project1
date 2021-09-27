@@ -40,22 +40,71 @@ resource "azurerm_network_security_group" "main" {
   location            = azurerm_resource_group.main.location
   resource_group_name = azurerm_resource_group.main.name
 
-  security_rule {
-    name                       = "test123"
-    priority                   = 100
-    direction                  = "Inbound"
-    access                     = "Allow"
-    protocol                   = "Tcp"
-    source_port_range          = "*"
-    destination_port_range     = "*"
-    source_address_prefix      = "*"
-    destination_address_prefix = "*"
-  }
-
   tags = {
     project = "udacity1"
     environment = "development"
   }
+}
+
+# Create security rules
+resource "azurerm_network_security_rule" "rule1" {
+    name                         = "DenyAllInbound"
+    description                  = "This rule with low priority deny all the inbound traffic."
+    priority                     = 100
+    direction                    = "Inbound"
+    access                       = "Deny"
+    protocol                     = "*"
+    source_port_range            = "*"
+    destination_port_range       = "*"
+    source_address_prefix        = "*"
+    destination_address_prefix   = "*"
+    resource_group_name          = azurerm_resource_group.main.name
+    network_security_group_name  = azurerm_network_security_group.main.name
+}
+
+resource "azurerm_network_security_rule" "rule2" {
+    name                         = "AllowInboundInsideVN"
+    description                  = "This rule allow the inbound traffic inside the same virtual network."
+    priority                     = 101
+    direction                    = "Inbound"
+    access                       = "Allow"
+    protocol                     = "*"
+    source_port_ranges           = azurerm_virtual_network.main.address_space
+    destination_port_ranges      = azurerm_virtual_network.main.address_space
+    source_address_prefix        = "VirtualNetwork"
+    destination_address_prefix   = "VirtualNetwork"
+    resource_group_name          = azurerm_resource_group.main.name
+    network_security_group_name  = azurerm_network_security_group.main.name
+}
+
+resource "azurerm_network_security_rule" "rule3" {
+    name                         = "AllowOutboundInsideVN"
+    description                  = "This rule allow the outbound traffic inside the same virtual network."
+    priority                     = 102
+    direction                    = "Outbound"
+    access                       = "Allow"
+    protocol                     = "*"
+    source_port_ranges           = azurerm_virtual_network.main.address_space
+    destination_port_ranges      = azurerm_virtual_network.main.address_space
+    source_address_prefix        = "VirtualNetwork"
+    destination_address_prefix   = "VirtualNetwork"
+    resource_group_name          = azurerm_resource_group.main.name
+    network_security_group_name  = azurerm_network_security_group.main.name
+}
+
+resource "azurerm_network_security_rule" "rule4" {
+    name                         = "AllowHTTPFromLB"
+    description                  = "This rule allow the HTTP traffic from the load balancer."
+    priority                     = 103
+    direction                    = "Inbound"
+    access                       = "Allow"
+    protocol                     = "Tcp"
+    source_port_ranges           = azurerm_virtual_network.main.address_space
+    destination_port_ranges      = azurerm_virtual_network.main.address_space
+    source_address_prefix        = "AzureLoadBalancer"
+    destination_address_prefix   = "VirtualNetwork"
+    resource_group_name          = azurerm_resource_group.main.name
+    network_security_group_name  = azurerm_network_security_group.main.name
 }
 
 # Create network interface
@@ -108,6 +157,13 @@ resource "azurerm_lb_backend_address_pool" "main" {
   name                = "${var.prefix}-lb-backend-pool"
 }
 
+# We associate the LB with the backend address pool
+resource "azurerm_network_interface_backend_address_pool_association" "main" {
+  network_interface_id    = azurerm_network_interface.main.id
+  ip_configuration_name   = "internal"
+  backend_address_pool_id = azurerm_lb_backend_address_pool.main.id
+}
+
 # Create virtual machine availability set
 resource "azurerm_availability_set" "main" {
   name                = "${var.prefix}-aset"
@@ -133,12 +189,7 @@ resource "azurerm_linux_virtual_machine" "main" {
   network_interface_ids = [element(azurerm_network_interface.main.*.id, count.index)]
   availability_set_id = azurerm_availability_set.main.id
 
-  source_image_reference {
-    publisher = "Canonical"
-    offer     = "UbuntuServer"
-    sku       = "18.04-LTS"
-    version   = "latest"
-  }
+  source_image_id = data.azurerm_image.web.id
 
   os_disk {
     storage_account_type = "Standard_LRS"
