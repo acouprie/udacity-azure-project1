@@ -27,8 +27,27 @@
   "provisioners": [
     {
       "inline": [
+        "sudo apt-get update",
+        "sudo apt-get upgrade -y",
         "echo 'Hello, World!' > index.html",
-        "nohup busybox httpd -f -p 80 &"
+        "touch http.service",
+        "echo '[Unit]' > http.service",
+        "echo 'Description=This is an example of webservice' >> http.service",
+        "echo 'After=network.target' >> http.service",
+        "echo 'StartLimitIntervalSec=0' >> http.service",
+        "echo '[Service]' >> http.service",
+        "echo 'RemainAferExit=yes' >> http.service",
+        "echo 'Restart=always' >> http.service",
+        "echo 'RestartSec=1' >> http.service",
+        "echo 'User=packer' >> http.service",
+        "echo 'ExecStart=/usr/bin/nohup /bin/busybox httpd -f -p 8080 -h /home/packer' >> http.service",
+        "echo '[Install]' >> http.service",
+        "echo 'WantedBy=multi-user.target' >> http.service",
+        "sudo mv http.service /etc/systemd/system",
+        "sudo chmod 755 /etc/systemd/system/http.service",
+        "sudo chown root:root /etc/systemd/system/http.service",
+        "sudo systemctl enable http",
+        "sudo systemctl daemon-reload"
       ],
       "inline_shebang": "/bin/sh -x",
       "type": "shell"
